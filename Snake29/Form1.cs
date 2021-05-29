@@ -579,20 +579,62 @@ namespace Snake29
                 }
                 for (int j = 0; j < f_size.X; j++)
                 {
-                    Glut.glutWireCube(cell_size.X);
-                    if (head.X == j && head.Y == i)
+                    Glut.glutWireCube(cell_size.X);//Отрисовка Ячейки поля
+                    if ((head.X == j) && (head.Y == i)){
+                        drawHead();
+                    }
+                    if (is_fruit_intersect(j,i)){
+                        //нада поменять цвет
+                        drawFruit();
+                    }
+                    if (is_tail_intersect(j,i))
                     {
-                        Gl.glTranslated(0, 0, cell_size.X);
-                        Glut.glutWireCone(cell_size.X * 5 / 12, cell_size.X * 5 / 6, 10, 10);
-                        Gl.glTranslated(0, 0, -cell_size.X);
-
+                        drawTail();
                     }
                     translated(cell_size.X);
 
                 }
             }
         }
-        void set_to_begin()//установить отрисовку в начало поля;
+        private void drawTail()
+        {
+            Gl.glTranslated(0, 0, cell_size.X);
+            Glut.glutWireSphere(cell_size.X * 11 / 24, 10, 10);
+            Gl.glTranslated(0, 0, -cell_size.X);
+        }
+        private bool is_fruit_intersect(int x, int y)
+        {
+            for (int i = 0; i < fruits_count; i++)
+            {
+                if ((fruits[i].X == x)&&(fruits[i].Y == y))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        private void drawFruit(){
+            Gl.glTranslated(0, 0, cell_size.X);
+            Glut.glutWireSphere(cell_size.X * 5 / 12, 10, 10);
+            Gl.glTranslated(0, 0, -cell_size.X);
+        }  
+        private void drawHead()
+        {
+            Gl.glTranslated(0, 0, cell_size.X);
+            Glut.glutWireCone(cell_size.X * 5 / 12, cell_size.X * 5 / 6, 10, 10);
+            Gl.glTranslated(0, 0, -cell_size.X);
+        }
+        private bool is_tail_intersect(int x, int y)
+        {
+            for (int i = 0; i < tail.Count; i++)
+            {
+                if ((tail[i].X == x)&&(tail[i].Y == y)){
+                    return true;
+                }
+            }
+            return false;
+        }
+        private void set_to_begin()//установить отрисовку в начало поля;
         {
             translated(-draw_position.X - 0.932f, -draw_position.Y + 0.93f);
         }
@@ -601,240 +643,242 @@ namespace Snake29
             Gl.glTranslated(x, y, 0);
             draw_position = new PointF(x, y);
         }
-        private void dhead()
-        {
-            Gl.glViewport(0, 0, SGC.Width, SGC.Height);
-            Gl.glLineWidth(2f);
-            Gl.glColor3f(0.9373f, 0.8f, 0.5647f);
+        #region 2DDraw
+        /* private void dhead()
+         {
+             Gl.glViewport(0, 0, SGC.Width, SGC.Height);
+             Gl.glLineWidth(2f);
+             Gl.glColor3f(0.9373f, 0.8f, 0.5647f);
 
-            float x_pos = field.l_up.X + head.X * cell_size.X;
-            float y_pos = field.r_down.Y + cell_size.Y + head.Y * cell_size.Y;
+             float x_pos = field.l_up.X + head.X * cell_size.X;
+             float y_pos = field.r_down.Y + cell_size.Y + head.Y * cell_size.Y;
 
-            PointF l_up = new PointF(x_pos, y_pos);
-            PointF r_d = new PointF(l_up.X + cell_size.X, l_up.Y - cell_size.Y);
+             PointF l_up = new PointF(x_pos, y_pos);
+             PointF r_d = new PointF(l_up.X + cell_size.X, l_up.Y - cell_size.Y);
 
-            Gl.glBegin(Gl.GL_LINE_STRIP);
+             Gl.glBegin(Gl.GL_LINE_STRIP);
 
-            Gl.glVertex2d(l_up.X, l_up.Y - cell_size.Y / 2);
-            Gl.glVertex2d(l_up.X + cell_size.X / 2, l_up.Y);
-            Gl.glVertex2d(l_up.X + cell_size.X, l_up.Y - cell_size.Y / 2);
-            Gl.glVertex2d(l_up.X + cell_size.X / 2, l_up.Y - cell_size.Y);
-            Gl.glVertex2d(l_up.X, l_up.Y - cell_size.Y / 2);
-            Gl.glEnd();
+             Gl.glVertex2d(l_up.X, l_up.Y - cell_size.Y / 2);
+             Gl.glVertex2d(l_up.X + cell_size.X / 2, l_up.Y);
+             Gl.glVertex2d(l_up.X + cell_size.X, l_up.Y - cell_size.Y / 2);
+             Gl.glVertex2d(l_up.X + cell_size.X / 2, l_up.Y - cell_size.Y);
+             Gl.glVertex2d(l_up.X, l_up.Y - cell_size.Y / 2);
+             Gl.glEnd();
 
-            double begin = 30;//начальная координата глаз в ячейке
-            double end = 50;//конечная координата в ячейке (begin - end = длина глаз)
-            double den = 100;//модификатор begin < den && end < den
+             double begin = 30;//начальная координата глаз в ячейке
+             double end = 50;//конечная координата в ячейке (begin - end = длина глаз)
+             double den = 100;//модификатор begin < den && end < den
 
-            switch (move_param)
-            {
-                case _move_param.up:
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(l_up.X + cell_size.X / 4, l_up.Y - cell_size.Y * begin / den);
-                    Gl.glVertex2d(l_up.X + cell_size.X / 4, l_up.Y - cell_size.Y * end / den);
-                    Gl.glEnd();
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(r_d.X - cell_size.X / 4, l_up.Y - cell_size.Y * begin / den);
-                    Gl.glVertex2d(r_d.X - cell_size.X / 4, l_up.Y - cell_size.Y * end / den);
-                    Gl.glEnd();
-                    break;
-                case _move_param.down:
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(l_up.X + cell_size.X / 4, r_d.Y + cell_size.Y * begin / den);
-                    Gl.glVertex2d(l_up.X + cell_size.X / 4, r_d.Y + cell_size.Y * end / den);
-                    Gl.glEnd();
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(r_d.X - cell_size.X / 4, r_d.Y + cell_size.Y * begin / den);
-                    Gl.glVertex2d(r_d.X - cell_size.X / 4, r_d.Y + cell_size.Y * end / den);
-                    Gl.glEnd();
-                    break;
-                case _move_param.left:
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(l_up.X + cell_size.X * begin / den, l_up.Y - cell_size.Y / 4);
-                    Gl.glVertex2d(l_up.X + cell_size.X * end / den, l_up.Y - cell_size.Y / 4);
-                    Gl.glEnd();
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(l_up.X + cell_size.X * begin / den, r_d.Y + cell_size.Y / 4);
-                    Gl.glVertex2d(l_up.X + cell_size.X * end / den, r_d.Y + cell_size.Y / 4);
-                    Gl.glEnd();
-                    break;
-                case _move_param.right:
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(r_d.X - cell_size.X * begin / den, l_up.Y - cell_size.Y / 4);
-                    Gl.glVertex2d(r_d.X - cell_size.X * end / den, l_up.Y - cell_size.Y / 4);
-                    Gl.glEnd();
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(r_d.X - cell_size.X * begin / den, r_d.Y + cell_size.Y / 4);
-                    Gl.glVertex2d(r_d.X - cell_size.X * end / den, r_d.Y + cell_size.Y / 4);
-                    Gl.glEnd();
-                    break;
-                case _move_param.stop:
-                    break;
-                default:
-                    break;
-            }
+             switch (move_param)
+             {
+                 case _move_param.up:
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(l_up.X + cell_size.X / 4, l_up.Y - cell_size.Y * begin / den);
+                     Gl.glVertex2d(l_up.X + cell_size.X / 4, l_up.Y - cell_size.Y * end / den);
+                     Gl.glEnd();
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(r_d.X - cell_size.X / 4, l_up.Y - cell_size.Y * begin / den);
+                     Gl.glVertex2d(r_d.X - cell_size.X / 4, l_up.Y - cell_size.Y * end / den);
+                     Gl.glEnd();
+                     break;
+                 case _move_param.down:
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(l_up.X + cell_size.X / 4, r_d.Y + cell_size.Y * begin / den);
+                     Gl.glVertex2d(l_up.X + cell_size.X / 4, r_d.Y + cell_size.Y * end / den);
+                     Gl.glEnd();
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(r_d.X - cell_size.X / 4, r_d.Y + cell_size.Y * begin / den);
+                     Gl.glVertex2d(r_d.X - cell_size.X / 4, r_d.Y + cell_size.Y * end / den);
+                     Gl.glEnd();
+                     break;
+                 case _move_param.left:
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(l_up.X + cell_size.X * begin / den, l_up.Y - cell_size.Y / 4);
+                     Gl.glVertex2d(l_up.X + cell_size.X * end / den, l_up.Y - cell_size.Y / 4);
+                     Gl.glEnd();
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(l_up.X + cell_size.X * begin / den, r_d.Y + cell_size.Y / 4);
+                     Gl.glVertex2d(l_up.X + cell_size.X * end / den, r_d.Y + cell_size.Y / 4);
+                     Gl.glEnd();
+                     break;
+                 case _move_param.right:
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(r_d.X - cell_size.X * begin / den, l_up.Y - cell_size.Y / 4);
+                     Gl.glVertex2d(r_d.X - cell_size.X * end / den, l_up.Y - cell_size.Y / 4);
+                     Gl.glEnd();
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(r_d.X - cell_size.X * begin / den, r_d.Y + cell_size.Y / 4);
+                     Gl.glVertex2d(r_d.X - cell_size.X * end / den, r_d.Y + cell_size.Y / 4);
+                     Gl.glEnd();
+                     break;
+                 case _move_param.stop:
+                     break;
+                 default:
+                     break;
+             }
 
-        }
-        private void dtail()
-        {
-            Gl.glViewport(0, 0, SGC.Width, SGC.Height);
-            Gl.glLineWidth(2f);
-            Gl.glColor3f(0.9373f, 0.8f, 0.5647f);
+         }
+         private void dtail()
+         {
+             Gl.glViewport(0, 0, SGC.Width, SGC.Height);
+             Gl.glLineWidth(2f);
+             Gl.glColor3f(0.9373f, 0.8f, 0.5647f);
 
-            for (int i = 0; i < tail.Count - 1; i++)
-            {
-                float x_pos = field.l_up.X + tail[i].X * cell_size.X;
-                float y_pos = field.r_down.Y + cell_size.Y + tail[i].Y * cell_size.Y;
+             for (int i = 0; i < tail.Count - 1; i++)
+             {
+                 float x_pos = field.l_up.X + tail[i].X * cell_size.X;
+                 float y_pos = field.r_down.Y + cell_size.Y + tail[i].Y * cell_size.Y;
 
-                float free_x = (cell_size.X - tail_size.X) / 2;
-                float free_y = (cell_size.Y - tail_size.Y) / 2;
+                 float free_x = (cell_size.X - tail_size.X) / 2;
+                 float free_y = (cell_size.Y - tail_size.Y) / 2;
 
-                PointF l_up = new PointF(x_pos + free_x, y_pos - free_y);
-                PointF r_d = new PointF(l_up.X + tail_size.X, l_up.Y - tail_size.Y);
+                 PointF l_up = new PointF(x_pos + free_x, y_pos - free_y);
+                 PointF r_d = new PointF(l_up.X + tail_size.X, l_up.Y - tail_size.Y);
 
-                Gl.glBegin(Gl.GL_LINE_STRIP);
+                 Gl.glBegin(Gl.GL_LINE_STRIP);
 
-                Gl.glVertex2d(l_up.X, l_up.Y);
-                Gl.glVertex2d(r_d.X, l_up.Y);
-                Gl.glVertex2d(r_d.X, r_d.Y);
-                Gl.glVertex2d(l_up.X, r_d.Y);
-                Gl.glVertex2d(l_up.X, l_up.Y);
+                 Gl.glVertex2d(l_up.X, l_up.Y);
+                 Gl.glVertex2d(r_d.X, l_up.Y);
+                 Gl.glVertex2d(r_d.X, r_d.Y);
+                 Gl.glVertex2d(l_up.X, r_d.Y);
+                 Gl.glVertex2d(l_up.X, l_up.Y);
 
-                Gl.glEnd();
-            }
+                 Gl.glEnd();
+             }
 
-            if (tail.Count > 1)
-            {
-                float x_pos = field.l_up.X + tail[tail.Count - 1].X * cell_size.X;
-                float y_pos = field.r_down.Y + cell_size.Y + tail[tail.Count - 1].Y * cell_size.Y;
+             if (tail.Count > 1)
+             {
+                 float x_pos = field.l_up.X + tail[tail.Count - 1].X * cell_size.X;
+                 float y_pos = field.r_down.Y + cell_size.Y + tail[tail.Count - 1].Y * cell_size.Y;
 
-                float free_x = (cell_size.X - tail_size.X) / 2;
-                float free_y = (cell_size.Y - tail_size.Y) / 2;
+                 float free_x = (cell_size.X - tail_size.X) / 2;
+                 float free_y = (cell_size.Y - tail_size.Y) / 2;
 
-                PointF l_up = new PointF(x_pos + free_x, y_pos - free_y);
-                PointF r_d = new PointF(l_up.X + tail_size.X, l_up.Y - tail_size.Y);
+                 PointF l_up = new PointF(x_pos + free_x, y_pos - free_y);
+                 PointF r_d = new PointF(l_up.X + tail_size.X, l_up.Y - tail_size.Y);
 
-                if ((tail[tail.Count - 1].X + 1) == tail[tail.Count - 2].X) // right mooving
-                {
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                    Gl.glVertex2d(r_d.X, l_up.Y);
-                    Gl.glVertex2d(r_d.X, r_d.Y);
-                    Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                    Gl.glEnd();
+                 if ((tail[tail.Count - 1].X + 1) == tail[tail.Count - 2].X) // right mooving
+                 {
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                     Gl.glVertex2d(r_d.X, l_up.Y);
+                     Gl.glVertex2d(r_d.X, r_d.Y);
+                     Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                     Gl.glEnd();
 
-                }
-                if ((tail[tail.Count - 1].X - 1) == tail[tail.Count - 2].X)//left mooving
-                {
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                    Gl.glVertex2d(l_up.X, r_d.Y);
-                    Gl.glVertex2d(l_up.X, l_up.Y);
-                    Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                    Gl.glEnd();
-                }
-                if ((tail[tail.Count - 1].Y + 1) == tail[tail.Count - 2].Y)//up mooving
-                {
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, r_d.Y);
-                    Gl.glVertex2d(l_up.X, l_up.Y);
-                    Gl.glVertex2d(r_d.X, l_up.Y);
-                    Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, r_d.Y);
-                    Gl.glEnd();
+                 }
+                 if ((tail[tail.Count - 1].X - 1) == tail[tail.Count - 2].X)//left mooving
+                 {
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                     Gl.glVertex2d(l_up.X, r_d.Y);
+                     Gl.glVertex2d(l_up.X, l_up.Y);
+                     Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                     Gl.glEnd();
+                 }
+                 if ((tail[tail.Count - 1].Y + 1) == tail[tail.Count - 2].Y)//up mooving
+                 {
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, r_d.Y);
+                     Gl.glVertex2d(l_up.X, l_up.Y);
+                     Gl.glVertex2d(r_d.X, l_up.Y);
+                     Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, r_d.Y);
+                     Gl.glEnd();
 
-                }
-                if ((tail[tail.Count - 1].Y - 1) == tail[tail.Count - 2].Y)//down mooving
-                {
-                    Gl.glBegin(Gl.GL_LINE_STRIP);
-                    Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, l_up.Y);
-                    Gl.glVertex2d(l_up.X, r_d.Y);
-                    Gl.glVertex2d(r_d.X, r_d.Y);
-                    Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, l_up.Y);
-                    Gl.glEnd();
-                }
-            }
-            else
-            {
-                if (tail.Count == 1)
-                {
+                 }
+                 if ((tail[tail.Count - 1].Y - 1) == tail[tail.Count - 2].Y)//down mooving
+                 {
+                     Gl.glBegin(Gl.GL_LINE_STRIP);
+                     Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, l_up.Y);
+                     Gl.glVertex2d(l_up.X, r_d.Y);
+                     Gl.glVertex2d(r_d.X, r_d.Y);
+                     Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, l_up.Y);
+                     Gl.glEnd();
+                 }
+             }
+             else
+             {
+                 if (tail.Count == 1)
+                 {
 
-                    float x_pos = field.l_up.X + tail[0].X * cell_size.X;
-                    float y_pos = field.r_down.Y + cell_size.Y + tail[0].Y * cell_size.Y;
+                     float x_pos = field.l_up.X + tail[0].X * cell_size.X;
+                     float y_pos = field.r_down.Y + cell_size.Y + tail[0].Y * cell_size.Y;
 
-                    float free_x = (cell_size.X - tail_size.X) / 2;
-                    float free_y = (cell_size.Y - tail_size.Y) / 2;
+                     float free_x = (cell_size.X - tail_size.X) / 2;
+                     float free_y = (cell_size.Y - tail_size.Y) / 2;
 
-                    PointF l_up = new PointF(x_pos + free_x, y_pos - free_y);
-                    PointF r_d = new PointF(l_up.X + tail_size.X, l_up.Y - tail_size.Y);
+                     PointF l_up = new PointF(x_pos + free_x, y_pos - free_y);
+                     PointF r_d = new PointF(l_up.X + tail_size.X, l_up.Y - tail_size.Y);
 
-                    if ((tail[tail.Count - 1].X + 1) == head.X) // right mooving
-                    {
-                        Gl.glBegin(Gl.GL_LINE_STRIP);
-                        Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                        Gl.glVertex2d(r_d.X, l_up.Y);
-                        Gl.glVertex2d(r_d.X, r_d.Y);
-                        Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                        Gl.glEnd();
+                     if ((tail[tail.Count - 1].X + 1) == head.X) // right mooving
+                     {
+                         Gl.glBegin(Gl.GL_LINE_STRIP);
+                         Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                         Gl.glVertex2d(r_d.X, l_up.Y);
+                         Gl.glVertex2d(r_d.X, r_d.Y);
+                         Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                         Gl.glEnd();
 
-                    }
-                    if ((tail[tail.Count - 1].X - 1) == head.X)//left mooving
-                    {
-                        Gl.glBegin(Gl.GL_LINE_STRIP);
-                        Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                        Gl.glVertex2d(l_up.X, r_d.Y);
-                        Gl.glVertex2d(l_up.X, l_up.Y);
-                        Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                        Gl.glEnd();
-                    }
-                    if ((tail[tail.Count - 1].Y + 1) == head.Y)//up mooving
-                    {
-                        Gl.glBegin(Gl.GL_LINE_STRIP);
-                        Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, r_d.Y);
-                        Gl.glVertex2d(l_up.X, l_up.Y);
-                        Gl.glVertex2d(r_d.X, l_up.Y);
-                        Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, r_d.Y);
-                        Gl.glEnd();
+                     }
+                     if ((tail[tail.Count - 1].X - 1) == head.X)//left mooving
+                     {
+                         Gl.glBegin(Gl.GL_LINE_STRIP);
+                         Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                         Gl.glVertex2d(l_up.X, r_d.Y);
+                         Gl.glVertex2d(l_up.X, l_up.Y);
+                         Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                         Gl.glEnd();
+                     }
+                     if ((tail[tail.Count - 1].Y + 1) == head.Y)//up mooving
+                     {
+                         Gl.glBegin(Gl.GL_LINE_STRIP);
+                         Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, r_d.Y);
+                         Gl.glVertex2d(l_up.X, l_up.Y);
+                         Gl.glVertex2d(r_d.X, l_up.Y);
+                         Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, r_d.Y);
+                         Gl.glEnd();
 
-                    }
-                    if ((tail[tail.Count - 1].Y - 1) == head.Y)//down mooving
-                    {
-                        Gl.glBegin(Gl.GL_LINE_STRIP);
-                        Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, l_up.Y);
-                        Gl.glVertex2d(l_up.X, r_d.Y);
-                        Gl.glVertex2d(r_d.X, r_d.Y);
-                        Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, l_up.Y);
-                        Gl.glEnd();
-                    }
-                }
-            }
+                     }
+                     if ((tail[tail.Count - 1].Y - 1) == head.Y)//down mooving
+                     {
+                         Gl.glBegin(Gl.GL_LINE_STRIP);
+                         Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, l_up.Y);
+                         Gl.glVertex2d(l_up.X, r_d.Y);
+                         Gl.glVertex2d(r_d.X, r_d.Y);
+                         Gl.glVertex2d(r_d.X - (r_d.X - l_up.X) / 2, l_up.Y);
+                         Gl.glEnd();
+                     }
+                 }
+             }
 
-        }
-        private void dfruits()
-        {
-            Gl.glViewport(0, 0, SGC.Width, SGC.Height);
-            Gl.glLineWidth(2f);
-            Gl.glColor3f(0.9373f, 0.8f, 0.5647f);
+         }
+         private void dfruits()
+         {
+             Gl.glViewport(0, 0, SGC.Width, SGC.Height);
+             Gl.glLineWidth(2f);
+             Gl.glColor3f(0.9373f, 0.8f, 0.5647f);
 
-            for (int i = 0; i < fruits.Count; i++)
-            {
-                float x_pos = field.l_up.X + fruits[i].X * cell_size.X;
-                float y_pos = field.r_down.Y + cell_size.Y + fruits[i].Y * cell_size.Y;
-                float free_x = (cell_size.X - tail_size.X) / 2;
-                float free_y = (cell_size.Y - tail_size.Y) / 2;
+             for (int i = 0; i < fruits.Count; i++)
+             {
+                 float x_pos = field.l_up.X + fruits[i].X * cell_size.X;
+                 float y_pos = field.r_down.Y + cell_size.Y + fruits[i].Y * cell_size.Y;
+                 float free_x = (cell_size.X - tail_size.X) / 2;
+                 float free_y = (cell_size.Y - tail_size.Y) / 2;
 
-                PointF l_up = new PointF(x_pos + free_x, y_pos - free_y);
-                PointF r_d = new PointF(l_up.X + tail_size.X, l_up.Y - tail_size.Y);
+                 PointF l_up = new PointF(x_pos + free_x, y_pos - free_y);
+                 PointF r_d = new PointF(l_up.X + tail_size.X, l_up.Y - tail_size.Y);
 
-                Gl.glBegin(Gl.GL_LINE_STRIP);
-                Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                Gl.glVertex2d(l_up.X + (r_d.X - l_up.X) / 2, l_up.Y);
-                Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                Gl.glVertex2d(l_up.X + (r_d.X - l_up.X) / 2, r_d.Y);
-                Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
-                Gl.glEnd();
+                 Gl.glBegin(Gl.GL_LINE_STRIP);
+                 Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                 Gl.glVertex2d(l_up.X + (r_d.X - l_up.X) / 2, l_up.Y);
+                 Gl.glVertex2d(r_d.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                 Gl.glVertex2d(l_up.X + (r_d.X - l_up.X) / 2, r_d.Y);
+                 Gl.glVertex2d(l_up.X, l_up.Y - (l_up.Y - r_d.Y) / 2);
+                 Gl.glEnd();
 
-            }
-        }
+             }
+         }/**/
+        #endregion
     }
     class Line
     {
