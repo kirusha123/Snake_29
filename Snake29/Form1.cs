@@ -580,59 +580,114 @@ namespace Snake29
                 for (int j = 0; j < f_size.X; j++)
                 {
                     Glut.glutWireCube(cell_size.X);//Отрисовка Ячейки поля
-                    if ((head.X == j) && (head.Y == i)){
+                    if ((head.X == j) && (head.Y == i))
+                    {
                         drawHead();
                     }
-                    if (is_fruit_intersect(j,i)){
+                    if (is_fruit_intersect(j, i))
+                    {
                         //нада поменять цвет
                         drawFruit();
                     }
-                    if (is_tail_intersect(j,i))
+                    int tID = is_tail_intersect(j, i);
+                    if (tID != -1)
                     {
-                        drawTail();
+                        if (tID < tail.Count - 3)
+                        {
+                            drawTail(cell_size.X * 11 / 24);
+                        }
+                        else
+                        {
+                            if (tID == tail.Count - 3)
+                            {
+                                drawTail(cell_size.X * 9 / 24);
+                            }
+                            if (tID == tail.Count - 2)
+                            {
+                                drawTail(cell_size.X * 7 / 24);
+                            }
+                            if (tID == tail.Count - 1)
+                            {
+                                drawTail(cell_size.X * 5 / 24);
+                            }
+                        }
+
                     }
                     translated(cell_size.X);
 
                 }
             }
         }
-        private void drawTail()
+        private void drawTail(double tail_size)
         {
             Gl.glTranslated(0, 0, cell_size.X);
-            Glut.glutWireSphere(cell_size.X * 11 / 24, 10, 10);
+            Glut.glutWireSphere(tail_size, 10, 10);
             Gl.glTranslated(0, 0, -cell_size.X);
         }
         private bool is_fruit_intersect(int x, int y)
         {
-            for (int i = 0; i < fruits_count; i++)
+            for (int i = 0; i < fruits.Count; i++)
             {
-                if ((fruits[i].X == x)&&(fruits[i].Y == y))
+                if ((fruits[i].X == x) && (fruits[i].Y == y))
                 {
                     return true;
                 }
             }
             return false;
         }
-        private void drawFruit(){
+        private void drawFruit()
+        {
             Gl.glTranslated(0, 0, cell_size.X);
             Glut.glutWireSphere(cell_size.X * 5 / 12, 10, 10);
             Gl.glTranslated(0, 0, -cell_size.X);
-        }  
+        }
         private void drawHead()
         {
             Gl.glTranslated(0, 0, cell_size.X);
-            Glut.glutWireCone(cell_size.X * 5 / 12, cell_size.X * 5 / 6, 10, 10);
+            Glut.glutWireCube(cell_size.X * 9 / 12);
             Gl.glTranslated(0, 0, -cell_size.X);
+            switch (move_param)
+            {
+                case _move_param.up:
+                    Gl.glTranslated(cell_size.X / 4, cell_size.X*11/24, 0);
+                    Glut.glutWireCube(cell_size.X / 6);
+                    Gl.glTranslated(-cell_size.X / 2, 0, 0);
+                    Glut.glutWireCube(cell_size.X / 6);
+                    Gl.glTranslated(cell_size.X / 4, -cell_size.X * 11/ 24, 0);
+                    break;
+                case _move_param.down:
+                    Gl.glTranslated(cell_size.X / 4, -cell_size.X * 11 / 24, 0);
+                    Glut.glutWireCube(cell_size.X / 6);
+                    Gl.glTranslated(-cell_size.X / 2, 0, 0);
+                    Glut.glutWireCube(cell_size.X / 6);
+                    Gl.glTranslated(cell_size.X / 4, cell_size.X * 11 / 24, 0);
+                    break;
+                case _move_param.left:
+                    Gl.glTranslated(-cell_size.X * 11 / 24, cell_size.X / 4, 0);
+                    Glut.glutWireCube(cell_size.X / 6);
+                    Gl.glTranslated(0, -cell_size.X / 2, 0);
+                    Glut.glutWireCube(cell_size.X / 6);
+                    Gl.glTranslated(cell_size.X * 11 / 24, cell_size.X / 4, 0);
+                    break;
+                case _move_param.right:
+                    Gl.glTranslated(cell_size.X * 11 / 24, cell_size.X / 4, 0);
+                    Glut.glutWireCube(cell_size.X / 6);
+                    Gl.glTranslated(0, -cell_size.X / 2, 0);
+                    Glut.glutWireCube(cell_size.X / 6);
+                    Gl.glTranslated(-cell_size.X * 11 / 24, cell_size.X / 4, 0);
+                    break;
+            }
         }
-        private bool is_tail_intersect(int x, int y)
+        private int is_tail_intersect(int x, int y)
         {
             for (int i = 0; i < tail.Count; i++)
             {
-                if ((tail[i].X == x)&&(tail[i].Y == y)){
-                    return true;
+                if ((tail[i].X == x) && (tail[i].Y == y))
+                {
+                    return i;
                 }
             }
-            return false;
+            return -1;
         }
         private void set_to_begin()//установить отрисовку в начало поля;
         {
