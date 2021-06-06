@@ -27,6 +27,9 @@ namespace Snake29
         Field field;
         Point f_size;
         PointF cell_size;
+        //----------------textures--------------------
+        public int fruitTextureID;
+        public uint fruitTexture;
 
 
         //----------------game params--------------------
@@ -60,6 +63,9 @@ namespace Snake29
         {
             InitializeComponent();
             SGC.InitializeContexts();
+
+            fruitTexture = 0;
+            fruitTextureID = 0;
 
             vert_lines = new List<Line>();
             hor_lines = new List<Line>();
@@ -336,6 +342,7 @@ namespace Snake29
             //tail.Add(new Point(head.X - 1, head.Y));
             //tail.Add(new Point(head.X - 2, head.Y));
             //tail.Add(new Point(head.X - 3, head.Y));
+            Gl.glRotated(80, 1, 0, 0);
 
             fruits = new List<Point>();
             Draw();
@@ -580,14 +587,17 @@ namespace Snake29
                 for (int j = 0; j < f_size.X; j++)
                 {
                     Glut.glutWireCube(cell_size.X);//Отрисовка Ячейки поля
-                    if ((head.X == j) && (head.Y == i))
-                    {
-                        drawHead();
-                    }
+                    
                     if (is_fruit_intersect(j, i))
                     {
                         //нада поменять цвет
                         drawFruit();
+                    }
+                    //отрисовка Гадюки
+                    Gl.glColor3d(1, 1, 0);
+                    if ((head.X == j) && (head.Y == i))
+                    {
+                        drawHead();
                     }
                     int tID = is_tail_intersect(j, i);
                     if (tID != -1)
@@ -613,6 +623,7 @@ namespace Snake29
                         }
 
                     }
+                    Gl.glColor3d(1, 0, 0);
                     translated(cell_size.X);
 
                 }
@@ -620,9 +631,9 @@ namespace Snake29
         }
         private void drawTail(double tail_size)
         {
-            Gl.glTranslated(0, 0, cell_size.X);
-            Glut.glutWireSphere(tail_size, 10, 10);
             Gl.glTranslated(0, 0, -cell_size.X);
+            Glut.glutWireSphere(tail_size, 10, 10);
+            Gl.glTranslated(0, 0, +cell_size.X);
         }
         private bool is_fruit_intersect(int x, int y)
         {
@@ -637,15 +648,17 @@ namespace Snake29
         }
         private void drawFruit()
         {
-            Gl.glTranslated(0, 0, cell_size.X);
-            Glut.glutWireSphere(cell_size.X * 5 / 12, 10, 10);
+            Gl.glColor3d(0, 1, 0);
             Gl.glTranslated(0, 0, -cell_size.X);
+            Glut.glutWireSphere(cell_size.X * 5 / 12, 10, 10);
+            Gl.glTranslated(0, 0, cell_size.X);
+            Gl.glColor3d(1, 0, 0);
         }
         private void drawHead()
         {
-            Gl.glTranslated(0, 0, cell_size.X);
-            Glut.glutWireCube(cell_size.X * 9 / 12);
             Gl.glTranslated(0, 0, -cell_size.X);
+            Glut.glutWireCube(cell_size.X * 9 / 12);
+            
             switch (move_param)
             {
                 case _move_param.up:
@@ -677,6 +690,7 @@ namespace Snake29
                     Gl.glTranslated(-cell_size.X * 11 / 24, cell_size.X / 4, 0);
                     break;
             }
+            Gl.glTranslated(0, 0, cell_size.X);
         }
         private int is_tail_intersect(int x, int y)
         {
