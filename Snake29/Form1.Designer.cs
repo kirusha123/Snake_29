@@ -36,6 +36,7 @@ namespace Snake29
             this.SGC = new Tao.Platform.Windows.SimpleOpenGlControl();
             this.t1 = new System.Windows.Forms.Timer(this.components);
             this.rightMenuPanel = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.cy = new System.Windows.Forms.Label();
@@ -44,7 +45,7 @@ namespace Snake29
             this.panel1 = new System.Windows.Forms.Panel();
             this.Stop_but = new System.Windows.Forms.Button();
             this.Start_but = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.upper_Panel.SuspendLayout();
             this.rightMenuPanel.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -126,6 +127,15 @@ namespace Snake29
             this.rightMenuPanel.Name = "rightMenuPanel";
             this.rightMenuPanel.Size = new System.Drawing.Size(299, 983);
             this.rightMenuPanel.TabIndex = 3;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(4, 38);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(22, 13);
+            this.label4.TabIndex = 6;
+            this.label4.Text = "pp:";
             // 
             // label3
             // 
@@ -210,14 +220,9 @@ namespace Snake29
             this.Start_but.UseVisualStyleBackColor = true;
             this.Start_but.Click += new System.EventHandler(this.Start_but_Click);
             // 
-            // label4
+            // openFileDialog1
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(4, 38);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(22, 13);
-            this.label4.TabIndex = 6;
-            this.label4.Text = "pp:";
+            this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // Form1
             // 
@@ -257,6 +262,7 @@ namespace Snake29
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }
 
