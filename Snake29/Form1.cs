@@ -18,6 +18,10 @@ namespace Snake29
     {
         Point lastPoint;
 
+        double old_angle;
+        double xo;
+        double yo;
+        double zo;
 
         const double left_b = -0.999;
         const double down_b = -0.995;
@@ -29,8 +33,16 @@ namespace Snake29
         Point f_size;
         PointF cell_size;
         //----------------textures--------------------
-        public int fruitTextureID;
-        public uint fruitTexture;
+        private int fruitTextureID;
+        private uint fruitTexture;
+
+        private int tailTextureID;
+        private uint tailTexture;
+
+        private int headTextureID;
+        private uint headTexture;
+
+        bool isTextureBrushLoaded;
 
 
         //----------------game params--------------------
@@ -62,6 +74,13 @@ namespace Snake29
         List<Line> hor_lines;
         public Form1()
         {
+
+            isTextureBrushLoaded = false;
+            old_angle = 0;
+            xo = 0;
+            yo = 0;
+            zo = 0;
+
             InitializeComponent();
             SGC.InitializeContexts();
 
@@ -346,7 +365,7 @@ namespace Snake29
             //tail.Add(new Point(head.X - 1, head.Y));
             //tail.Add(new Point(head.X - 2, head.Y));
             //tail.Add(new Point(head.X - 3, head.Y));
-            Gl.glRotated(90, 1, 0, 0);
+            //Gl.glRotated(90, 1, 0, 0);
 
             fruits = new List<Point>();
             Draw();
@@ -594,7 +613,7 @@ namespace Snake29
 
                     if (is_fruit_intersect(j, i))
                     {
-                        
+
                         drawFruit();
                     }
                     //отрисовка Гадюки
@@ -636,8 +655,23 @@ namespace Snake29
         private void drawTail(double tail_size)
         {
             Gl.glTranslated(0, 0, -cell_size.X);
+            Glu.GLUquadric quadr1;
+            quadr1 = Glu.gluNewQuadric();
+            Glu.gluQuadricTexture(quadr1, Gl.GL_TRUE);
+            Gl.glEnable(Gl.GL_TEXTURE_2D);
+
+            Gl.glBindTexture(Gl.GL_TEXTURE_2D, tailTexture);
+            Glu.gluSphere(quadr1, tail_size, 32, 32);
+            Glu.gluDeleteQuadric(quadr1);
+
+            Gl.glDisable(Gl.GL_TEXTURE_2D);
+
+            Gl.glTranslated(0, 0, cell_size.X);
+            /*
+            Gl.glTranslated(0, 0, -cell_size.X);
             Glut.glutWireSphere(tail_size, 10, 10);
             Gl.glTranslated(0, 0, +cell_size.X);
+            */
         }
         private bool is_fruit_intersect(int x, int y)
         {
@@ -676,13 +710,28 @@ namespace Snake29
         private void drawHead()
         {
             Gl.glTranslated(0, 0, -cell_size.X);
-            Glut.glutWireCube(cell_size.X * 9 / 12);
+            Glu.GLUquadric quadr1;
+            quadr1 = Glu.gluNewQuadric();
+            Glu.gluQuadricTexture(quadr1, Gl.GL_TRUE);
+            Gl.glEnable(Gl.GL_TEXTURE_2D);
+
+            Gl.glBindTexture(Gl.GL_TEXTURE_2D, headTexture);
+            Glu.gluSphere(quadr1, cell_size.X * 5 / 12, 32, 32);
+
+
+
+            Glu.gluDeleteQuadric(quadr1);
+
+            Gl.glDisable(Gl.GL_TEXTURE_2D);
+            /*Gl.glTranslated(0, 0, -cell_size.X);
+            Glut.glutWireCube(cell_size.X * 9 / 12);*/
 
             switch (move_param)
             {
                 case _move_param.up:
                     Gl.glTranslated(cell_size.X / 4, cell_size.X * 11 / 24, 0);
-                    Glut.glutWireCube(cell_size.X / 6);
+                    //Glut.glutWireCube(cell_size.X / 6);
+                    Glut.glutSolidCube(cell_size.X / 6);
                     Gl.glTranslated(-cell_size.X / 2, 0, 0);
                     Glut.glutWireCube(cell_size.X / 6);
                     Gl.glTranslated(cell_size.X / 4, -cell_size.X * 11 / 24, 0);
@@ -731,52 +780,115 @@ namespace Snake29
             Gl.glTranslated(x, y, 0);
             draw_position = new PointF(x, y);
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            Gl.glRotated(-old_angle, -xo, -yo, -zo);
+
+            double angle;
+            angle = AngleBar.Value;
+
+            Gl.glRotated(angle, Convert.ToDouble(t_x.Text), Convert.ToDouble(t_y.Text), Convert.ToDouble(t_z.Text));
+            Draw();
+        }
+
         private void upload_Textures()
         {
-            DialogResult res = openFileDialog1.ShowDialog();
-
-            while (res != DialogResult.OK)
+            if (isTextureBrushLoaded == false)
             {
+                MessageBox.Show("Выберите текстуру яблока");
+
+                DialogResult res = openFileDialog1.ShowDialog();
+
+                while (res != DialogResult.OK)
+                {
+                    res = openFileDialog1.ShowDialog();
+                }
+                Il.ilGenImages(1, out fruitTextureID);
+                Il.ilBindImage(fruitTextureID);
+                string url = openFileDialog1.FileName;
+
+                if (Il.ilLoadImage(url))
+                {
+
+                    int width = Il.ilGetInteger(Il.IL_IMAGE_WIDTH);
+                    int height = Il.ilGetInteger(Il.IL_IMAGE_HEIGHT);
+
+                    int bitspp = Il.ilGetInteger(Il.IL_IMAGE_BITS_PER_PIXEL);
+
+                    fruitTexture = MakeGlTexture(Gl.GL_RGB, Il.ilGetData(), width, height);
+                }
+
+
+
+                MessageBox.Show("Выберите текстуру хвоста");
                 res = openFileDialog1.ShowDialog();
+
+                while (res != DialogResult.OK)
+                {
+                    res = openFileDialog1.ShowDialog();
+                }
+                Il.ilGenImages(1, out tailTextureID);
+                Il.ilBindImage(tailTextureID);
+                url = openFileDialog1.FileName;
+
+                if (Il.ilLoadImage(url))
+                {
+
+                    int width = Il.ilGetInteger(Il.IL_IMAGE_WIDTH);
+                    int height = Il.ilGetInteger(Il.IL_IMAGE_HEIGHT);
+
+                    int bitspp = Il.ilGetInteger(Il.IL_IMAGE_BITS_PER_PIXEL);
+
+                    tailTexture = MakeGlTexture(Gl.GL_RGB, Il.ilGetData(), width, height);
+                }
+
+
+                MessageBox.Show("Выберите текстуру головы");
+                res = openFileDialog1.ShowDialog();
+
+                while (res != DialogResult.OK)
+                {
+                    res = openFileDialog1.ShowDialog();
+                }
+                Il.ilGenImages(1, out headTextureID);
+                Il.ilBindImage(headTextureID);
+                url = openFileDialog1.FileName;
+
+                if (Il.ilLoadImage(url))
+                {
+
+                    int width = Il.ilGetInteger(Il.IL_IMAGE_WIDTH);
+                    int height = Il.ilGetInteger(Il.IL_IMAGE_HEIGHT);
+
+                    int bitspp = Il.ilGetInteger(Il.IL_IMAGE_BITS_PER_PIXEL);
+
+                    headTexture = MakeGlTexture(Gl.GL_RGB, Il.ilGetData(), width, height);
+                }
+                isTextureBrushLoaded = true;
             }
-            Il.ilGenImages(1, out fruitTextureID);
-            Il.ilBindImage(fruitTextureID);
-            string url = openFileDialog1.FileName;
-
-            if (Il.ilLoadImage(url))
-            {
-               
-                int width = Il.ilGetInteger(Il.IL_IMAGE_WIDTH);
-                int height = Il.ilGetInteger(Il.IL_IMAGE_HEIGHT);
-
-                int bitspp = Il.ilGetInteger(Il.IL_IMAGE_BITS_PER_PIXEL);
-
-                fruitTexture = MakeGlTexture(Gl.GL_RGB, Il.ilGetData(), width, height);
-            }
-
-            
-
         }
         private uint MakeGlTexture(int Format, IntPtr pixels, int w, int h)
         {
             uint texObject;
 
-            
+
             Gl.glGenTextures(1, out texObject);
 
             Gl.glPixelStorei(Gl.GL_UNPACK_ALIGNMENT, 1);
 
-            
+
             Gl.glBindTexture(Gl.GL_TEXTURE_2D, texObject);
 
-           
+
             Gl.glTexParameteri(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_WRAP_S, Gl.GL_REPEAT);
             Gl.glTexParameteri(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_WRAP_T, Gl.GL_REPEAT);
             Gl.glTexParameteri(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_MAG_FILTER, Gl.GL_LINEAR);
             Gl.glTexParameteri(Gl.GL_TEXTURE_2D, Gl.GL_TEXTURE_MIN_FILTER, Gl.GL_LINEAR);
             Gl.glTexEnvf(Gl.GL_TEXTURE_ENV, Gl.GL_TEXTURE_ENV_MODE, Gl.GL_REPLACE);
 
-           
+
             switch (Format)
             {
                 case Gl.GL_RGB:
@@ -794,6 +906,7 @@ namespace Snake29
 
             return texObject;
         }
+
         #region 2DDraw
         /* private void dhead()
          {
